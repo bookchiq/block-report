@@ -16,12 +16,14 @@ async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export function getLibraries(): Promise<CommunityAnchor[]> {
-  return fetchJSON(`${BASE}/locations/libraries`);
+export async function getLibraries(): Promise<CommunityAnchor[]> {
+  const data = await fetchJSON<CommunityAnchor[]>(`${BASE}/locations/libraries`);
+  return data.map((item) => ({ ...item, type: 'library' as const }));
 }
 
-export function getRecCenters(): Promise<CommunityAnchor[]> {
-  return fetchJSON(`${BASE}/locations/rec-centers`);
+export async function getRecCenters(): Promise<CommunityAnchor[]> {
+  const data = await fetchJSON<CommunityAnchor[]>(`${BASE}/locations/rec-centers`);
+  return data.map((item) => ({ ...item, type: 'rec_center' as const }));
 }
 
 export function getTransitStops(): Promise<TransitStop[]> {
