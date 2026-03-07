@@ -10,10 +10,11 @@ interface SidebarProps {
   briefLoading: boolean;
 }
 
-function LoadingSpinner() {
+function LoadingSpinner({ label }: { label: string }) {
   return (
-    <div className="flex items-center justify-center py-8">
+    <div role="status" aria-label={label} className="flex items-center justify-center py-8">
       <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
+      <span className="sr-only">{label}</span>
     </div>
   );
 }
@@ -41,13 +42,13 @@ export default function Sidebar({
     return (
       <div className="p-4">
         <h2 className="text-lg font-semibold mb-2">{community}</h2>
-        <LoadingSpinner />
+        <LoadingSpinner label={`Loading data for ${community}`} />
       </div>
     );
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 space-y-4" aria-live="polite" aria-atomic="false">
       <h2 className="text-lg font-semibold">{community}</h2>
 
       {metrics && (
@@ -94,7 +95,7 @@ export default function Sidebar({
                 {metrics.recentlyResolved.map((item, i) => (
                   <li key={`${item.category}-${item.date}-${i}`} className="flex justify-between">
                     <span>{item.category}</span>
-                    <span className="text-xs text-gray-400">{item.date}</span>
+                    <span className="text-xs text-gray-500">{item.date}</span>
                   </li>
                 ))}
               </ul>
@@ -106,7 +107,8 @@ export default function Sidebar({
             type="button"
             onClick={onGenerateBrief}
             disabled={briefLoading}
-            className="w-full rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-busy={briefLoading}
+            className="w-full rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             {briefLoading ? 'Generating...' : 'Generate Brief'}
           </button>
