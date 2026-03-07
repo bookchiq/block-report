@@ -27,7 +27,7 @@ Analyze the list of issues. Filter out any that depend on other open issues (loo
 
 Present the candidates to the user with a brief summary of each and recommend the easiest one. Use AskUserQuestion to let the user pick which issue to work on.
 
-## Step 4: Assign the issue
+## Step 4: Assign the issue AS SOON as the user selects an option (before writing the plan)
 
 Run `gh issue edit <N> --add-assignee @me` to assign the chosen issue to the current user.
 
