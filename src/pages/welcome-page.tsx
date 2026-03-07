@@ -52,9 +52,9 @@ export default function WelcomePage() {
 
         {/* Hero */}
         <section aria-labelledby="hero-heading" className="text-center mb-8">
-          <h2 id="hero-heading" className="text-2xl font-bold text-gray-900 mb-3 leading-snug">
+          <h1 id="hero-heading" className="text-2xl font-bold text-gray-900 mb-3 leading-snug">
             {t('welcome.heading')}
-          </h2>
+          </h1>
           <p className="text-gray-600 text-sm mb-6 max-w-md mx-auto">
             {t('welcome.subheading')}
           </p>
@@ -93,7 +93,7 @@ export default function WelcomePage() {
           <h2 id="explore-heading" className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
             {t('welcome.explore')}
           </h2>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="list">
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {QUESTION_TILES.map((tile) => (
               <li key={tile.qKey} className="rounded-xl border border-gray-200 bg-white p-4">
                 <span className="text-xl mb-2 block" aria-hidden="true">{tile.icon}</span>
@@ -110,7 +110,7 @@ export default function WelcomePage() {
             {t('welcome.browseAll')}
           </h2>
           <nav aria-label="Neighborhood directory">
-            <ul className="flex flex-wrap gap-2" role="list">
+            <ul className="flex flex-wrap gap-2">
               {COMMUNITIES.map((name) => (
                 <li key={name}>
                   <a

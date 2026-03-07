@@ -168,7 +168,7 @@ function SanDiegoMap({
     <div role="region" aria-label="San Diego neighborhood map" className="relative w-full h-full">
     {/* Legend */}
     <nav aria-label="Map legend" className="absolute bottom-8 left-2 z-[1000] bg-white/90 backdrop-blur-sm rounded-lg shadow-md px-3 py-2 text-xs print:hidden">
-      <ul className="space-y-1.5" role="list">
+      <ul className="space-y-1.5">
         <li className="flex items-center gap-2">
           <span aria-hidden="true" className="inline-block w-3 h-3 rounded-full bg-blue-500 shrink-0" />
           <span className="text-gray-700">Library</span>
@@ -230,7 +230,8 @@ function SanDiegoMap({
           key={lib.id}
           position={[lib.lat, lib.lng]}
           icon={blueIcon}
-          aria-label={`Library: ${lib.name}`}
+          title={`Library: ${lib.name}`}
+          alt={`Library: ${lib.name}`}
           eventHandlers={{ click: handleMarkerClick(lib) }}
         >
           <Popup>
@@ -245,7 +246,8 @@ function SanDiegoMap({
           key={rc.id}
           position={[rc.lat, rc.lng]}
           icon={greenIcon}
-          aria-label={`Rec Center: ${rc.name}`}
+          title={`Rec Center: ${rc.name}`}
+          alt={`Rec Center: ${rc.name}`}
           eventHandlers={{ click: handleMarkerClick(rc) }}
         >
           <Popup>
