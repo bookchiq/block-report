@@ -2,6 +2,7 @@
   "name": "block-report",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "vite",
@@ -11,7 +12,9 @@
     "db:start": "npx supabase start",
     "db:stop": "npx supabase stop",
     "db:reset": "npx supabase db reset",
-    "db:seed": "node --env-file=.env --import=tsx scripts/seed.ts"
+    "db:seed": "node --env-file=.env --import=tsx scripts/seed.ts",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +35,8 @@
     "react-router-dom": "^7.13.1"
   },
   "devDependencies": {
+    "@axe-core/react": "^4.11.1",
+    "@eslint/js": "^9.39.4",
     "@tailwindcss/vite": "^4.2.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
@@ -42,9 +47,13 @@
     "@vitejs/plugin-react": "^5.1.4",
     "concurrently": "^9.2.1",
     "csv-parse": "^6.1.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1",
     "vite": "^7.3.1"
   }
 }
