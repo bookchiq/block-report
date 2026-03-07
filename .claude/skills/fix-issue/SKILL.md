@@ -14,7 +14,7 @@ Run `git checkout main && git pull` to ensure the local repo is up to date.
 
 ## Step 2: Find unassigned issues
 
-Run `gh issue list --state open --json number,title,body,labels,assignees --jq '[.[] | select(.assignees | length == 0)]'` to get all unassigned open issues.
+Run `gh issue list --state open --json number,title,body,labels,assignees --jq '[.[] | select(.assignees | length == 0) | select((.labels | map(.name)) - ["backlog","wontfix","duplicate","invalid"] == (.labels | map(.name)))]'` to get all unassigned, actionable open issues.
 
 If there are no unassigned issues, tell the user and stop.
 
