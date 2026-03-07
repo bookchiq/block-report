@@ -2,6 +2,7 @@
 // Brief workstream owns this file
 
 import Anthropic from '@anthropic-ai/sdk';
+import { logger } from '../logger.js';
 import type { NeighborhoodProfile, CommunityBrief } from '../../src/types/index.js';
 
 function getClient(): Anthropic {
@@ -74,8 +75,17 @@ IMPORTANT: Respond ONLY with valid JSON matching this exact structure:
     return brief;
   } catch (error) {
     if (error instanceof SyntaxError) {
+      logger.error('Failed to parse JSON from Claude response', {
+        error: error.message,
+        community: profile.communityName,
+      });
       throw new Error('Failed to parse JSON from Claude response');
     }
+    logger.error('Claude API call failed', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      community: profile.communityName,
+    });
     throw error;
   }
 }
