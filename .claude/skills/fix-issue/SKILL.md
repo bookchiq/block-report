@@ -18,14 +18,14 @@ Run `gh issue list --state open --json number,title,body,labels,assignees --jq '
 
 If there are no unassigned issues, tell the user and stop.
 
-## Step 3: Pick the easiest issue
+## Step 3: Present top issues to the user
 
-Analyze the list of issues. Select the one that appears simplest to implement based on:
+Analyze the list of issues. Filter out any that depend on other open issues (look for "dependent on", "depends on", "blocked by" in the body). From the remaining issues, select up to 4 candidates ranked by simplicity:
 - Clarity of requirements in the title/body
 - Likely number of files and lines to change
 - Low risk of side effects
 
-Explain which issue was picked and why.
+Present the candidates to the user with a brief summary of each and recommend the easiest one. Use AskUserQuestion to let the user pick which issue to work on.
 
 ## Step 4: Assign the issue
 

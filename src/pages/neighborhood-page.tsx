@@ -42,7 +42,7 @@ export default function NeighborhoodPage() {
       setSelectedCommunity(communityFromUrl);
       setSelectedAnchor(null);
     }
-  }, [slug]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [slug]);
 
   // Fetch map data on mount
   useEffect(() => {

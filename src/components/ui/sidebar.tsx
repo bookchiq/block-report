@@ -92,7 +92,7 @@ export default function Sidebar({
   if (loading) {
     return (
       <div className="p-4">
-        <h2 className="text-lg font-semibold mb-2">{community}</h2>
+        <h1 className="text-lg font-semibold mb-2">{community}</h1>
         <LoadingSpinner label={t('loading.data', { community })} />
       </div>
     );
@@ -100,16 +100,21 @@ export default function Sidebar({
 
   return (
     <div className="p-4 space-y-5" aria-live="polite" aria-atomic="false">
-      <h2 className="text-lg font-semibold">{community}</h2>
+      <h1 className="text-lg font-semibold">{community}</h1>
 
       {metrics && (
         <>
           {/* Narrative summary */}
           <section aria-labelledby="summary-heading">
-            <h3 id="summary-heading" className="sr-only">{t('sidebar.neighborhoodSummary')}</h3>
-            <p className="text-sm text-gray-700 mb-3">
+            <h2 id="summary-heading" className="sr-only">{t('sidebar.neighborhoodSummary')}</h2>
+            <p className="text-sm text-gray-700 mb-1">
               {t('sidebar.requestsSummary', { count: metrics.totalRequests311.toLocaleString() })}
             </p>
+            {metrics.requestsPer1000Residents != null && metrics.population > 0 && (
+              <p className="text-sm text-gray-600 mb-3">
+                Residents here report about <span className="font-semibold">{metrics.requestsPer1000Residents}</span> issues per 1,000 people.
+              </p>
+            )}
             <div className="flex flex-wrap gap-2">
               {resolutionBadge(metrics.resolutionRate)}
               {responseBadge(metrics.avgDaysToResolve)}
@@ -139,6 +144,18 @@ export default function Sidebar({
                   <dt className="text-gray-500">{t('sidebar.avgDays')}</dt>
                   <dd className="font-mono font-medium">{metrics.avgDaysToResolve.toFixed(1)}</dd>
                 </div>
+                {metrics.population > 0 && (
+                  <div className="flex justify-between">
+                    <dt className="text-gray-500">Est. population</dt>
+                    <dd className="font-mono font-medium">{metrics.population.toLocaleString()}</dd>
+                  </div>
+                )}
+                {metrics.requestsPer1000Residents != null && (
+                  <div className="flex justify-between">
+                    <dt className="text-gray-500">Requests per 1,000</dt>
+                    <dd className="font-mono font-medium">{metrics.requestsPer1000Residents}</dd>
+                  </div>
+                )}
               </dl>
             )}
           </section>
@@ -146,9 +163,9 @@ export default function Sidebar({
           {/* Top issues — visual bars */}
           {metrics.topIssues.length > 0 && (
             <section aria-labelledby="issues-heading">
-              <h3 id="issues-heading" className="text-sm font-medium text-gray-700 mb-2">
+              <h2 id="issues-heading" className="text-sm font-medium text-gray-700 mb-2">
                 {t('sidebar.topIssues')}
-              </h3>
+              </h2>
               <ul className="space-y-2.5">
                 {(() => {
                   const maxCount = metrics.topIssues[0].count;
@@ -176,9 +193,9 @@ export default function Sidebar({
           {/* Recently resolved */}
           {metrics.recentlyResolved.length > 0 && (
             <section aria-labelledby="resolved-heading">
-              <h3 id="resolved-heading" className="text-sm font-medium text-gray-700 mb-2">
+              <h2 id="resolved-heading" className="text-sm font-medium text-gray-700 mb-2">
                 {t('sidebar.recentlyResolved')}
-              </h3>
+              </h2>
               <ul className="space-y-1 text-sm text-gray-600">
                 {metrics.recentlyResolved.map((item, i) => (
                   <li key={`${item.category}-${item.date}-${i}`} className="flex justify-between gap-2">

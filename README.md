@@ -117,6 +117,19 @@ block-report/
 - **AI:** Anthropic Claude API
 - **Data:** San Diego Open Data Portal, U.S. Census ACS
 
+## Accessibility
+
+The project enforces WCAG 2.1 AA compliance with two automated tools:
+
+- **`@axe-core/react`** — runs in development mode and logs accessibility violations to the browser console on every render. No setup needed; just run `pnpm dev` and open the console.
+- **`eslint-plugin-jsx-a11y`** — static analysis that catches common JSX accessibility issues at lint time.
+
+Run the linter to check for violations:
+
+```bash
+pnpm lint
+```
+
 ## License
 
 ISC
