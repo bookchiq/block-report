@@ -30,7 +30,7 @@ Everyone should be in the same repo from the start. Agree on interfaces early (w
 - [ ] Create repo, set up Vite + React + TypeScript + Tailwind + Leaflet
 - [ ] Agree on project structure and file layout
 - [ ] Agree on data interfaces (see "Key Interfaces" below)
-- [ ] Person A: register for Census API key now: https://api.census.gov/data/key_signup.html (instant)
+- [x] Person A: Census API key registered and added to .env.example
 - [ ] Confirm Anthropic API credits are working
 - [ ] Each person pulls the repo and confirms they can run `npm run dev`
 
@@ -75,7 +75,7 @@ Everyone should be in the same repo from the start. Agree on interfaces early (w
 **Person A:**
 - [ ] Implement Census API service (`server/services/census.ts`) with caching
 - [ ] Implement `/api/demographics?tract={id}` endpoint — ACS language data by tract
-  - Table B16001: Language spoken at home
+  - Table C16001: Language spoken at home (B16001 is discontinued)
   - Join to neighborhoods via tract-to-community mapping
 - [ ] Compute "access gap" signals: low 311 rate + low transit density + high non-English speaking population
 - [ ] Expose gap scores through an endpoint or as part of the 311 response
@@ -110,15 +110,22 @@ Everyone should be in the same repo from the start. Agree on interfaces early (w
 
 ## Key Data Sources
 
-| Dataset | Portal URL | Format | Key Fields |
-|---------|-----------|--------|------------|
-| Get It Done (311) | data.sandiego.gov/datasets/get-it-done-311/ | CSV, API | date, problem_category, lat/lng, status, date_closed |
-| Library Locations | data.sandiego.gov/datasets/library-locations/ | GeoJSON, CSV | name, address, lat/lng, website, phone |
-| Recreation Centers | data.sandiego.gov/datasets/recreation-center-locations/ | GeoJSON, CSV | name, address, community, facilities |
-| Transit Routes | data.sandiego.gov/datasets/transit-routes/ | GeoJSON | route_name, route_type, geometry |
-| Transit Stops (SANDAG) | sdgis-sandag.opendata.arcgis.com | GeoJSON | stop coordinates |
-| Census ACS Language | api.census.gov/data/2022/acs/acs5 | JSON API | B16001 table (language spoken at home by tract) |
+SD open data is **static files on seshat.datasd.org** — NOT a live Socrata/SODA API. No query params, download full files and filter in code.
+
+| Dataset | Download URL | Format | Key Fields |
+|---------|-------------|--------|------------|
+| Get It Done (311) open | `seshat.datasd.org/get_it_done_reports/get_it_done_requests_open_datasd.csv` | CSV | date_requested, service_name, status, lat, lng, comm_plan_name |
+| Get It Done (311) closed | `seshat.datasd.org/get_it_done_reports/get_it_done_requests_closed_{year}_datasd.csv` | CSV | same + date_closed |
+| Library Locations | `seshat.datasd.org/gis_library_locations/libraries_datasd.csv` | CSV, GeoJSON | name, address, lat, lng, phone, website (NO community field) |
+| Recreation Centers | `seshat.datasd.org/gis_recreation_center/rec_centers_datasd.csv` | CSV, GeoJSON | rec_bldg, address, neighborhd (ALL CAPS), lat, lng, facility flags |
+| Transit Stops | `seshat.datasd.org/gis_transit_stops/transit_stops_datasd.csv` | CSV, GeoJSON | stop_name, stop_lat, stop_lon, stop_agncy, lat, lng |
+| Census ACS Language | `api.census.gov/data/2021/acs/acs5` | JSON API | **C16001** table (B16001 is dead). C16001_001E=total, _002E=English, _003E=Spanish, etc. |
 | Permits (stretch) | data.sandiego.gov/datasets/ (search for permits) | CSV | type, date, location, status |
+
+**Important notes:**
+- 311 `comm_plan_name` has mixed case ("Mira Mesa" and "MIRA MESA") — normalize!
+- Libraries have no neighborhood field — infer from lat/lng proximity to rec centers or hardcode
+- Primary test community: **Mira Mesa**
 
 ---
 

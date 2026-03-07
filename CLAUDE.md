@@ -88,7 +88,7 @@ Shared files (`src/types/index.ts`, `server/index.ts`, config files) require coo
 ```
 # .env.example
 ANTHROPIC_API_KEY=
-CENSUS_API_KEY=
+CENSUS_API_KEY=763fa6e6daf21d98f76cfc93e760fe4cb76aa316
 PORT=3001
 ```
 
@@ -161,23 +161,51 @@ Or use `concurrently` in package.json scripts to run both with `npm run dev:all`
 
 ## Key Data Endpoints
 
+San Diego's open data portal hosts **static CSV/GeoJSON files** on `seshat.datasd.org`, NOT a live Socrata/SODA query API. There are no resource IDs or query parameters — download the full file and filter in code.
+
 ```bash
-# Get It Done (311) — SODA API
-# Docs: https://data.sandiego.gov/datasets/get-it-done-311/
-curl "https://data.sandiego.gov/resource/h3qk-cz8g.json?\$limit=5"
+# Library locations (CSV or GeoJSON)
+# Columns: objectid, name, address, city, zip, phone, website, lat, lng
+# NOTE: No community/neighborhood field — must infer from lat/lng or hardcode
+curl "https://seshat.datasd.org/gis_library_locations/libraries_datasd.csv"
+curl "https://seshat.datasd.org/gis_library_locations/libraries_datasd.geojson"
 
-# Library locations
-curl "https://data.sandiego.gov/resource/govk-26ga.json"
+# Recreation center locations (CSV or GeoJSON)
+# Columns: objectid, rec_bldg, park_name, fac_nm_id, address, zip, sq_ft,
+#   year_built, serv_dist, [facility flags], cd, neighborhd, lat, lng
+# NOTE: neighborhd is ALL CAPS (e.g. "MIRA MESA", "BARRIO LOGAN")
+curl "https://seshat.datasd.org/gis_recreation_center/rec_centers_datasd.csv"
+curl "https://seshat.datasd.org/gis_recreation_center/rec_centers_datasd.geojson"
 
-# Recreation center locations
-curl "https://data.sandiego.gov/resource/qjzh-bwut.json"
+# Transit stops (CSV or GeoJSON)
+# Columns: objectid, stop_uid, stop_id, stop_code, stop_name, stop_lat,
+#   stop_lon, stop_agncy, wheelchair, intersec, stop_place, parent_sta, lat, lng
+curl "https://seshat.datasd.org/gis_transit_stops/transit_stops_datasd.csv"
+curl "https://seshat.datasd.org/gis_transit_stops/transit_stops_datasd.geojson"
 
-# Transit routes (GeoJSON)
-# https://data.sandiego.gov/datasets/transit-routes/
+# Get It Done (311) — static CSVs, not a query API
+# Columns: service_request_id, date_requested, case_age_days, service_name,
+#   service_name_detail, date_closed, status, lat, lng, street_address, zipcode,
+#   council_district, comm_plan_code, comm_plan_name, case_origin, public_description
+# NOTE: comm_plan_name has MIXED CASE ("Barrio Logan" and "BARRIO LOGAN") — normalize!
+# Open requests (single file):
+curl "https://seshat.datasd.org/get_it_done_reports/get_it_done_requests_open_datasd.csv"
+# Closed requests (split by year, 2016–2026):
+curl "https://seshat.datasd.org/get_it_done_reports/get_it_done_requests_closed_2025_datasd.csv"
 
 # Census ACS — language spoken at home by tract
-# https://api.census.gov/data/2022/acs/acs5?get=B16001_001E,B16001_003E&for=tract:*&in=state:06&in=county:073
+# USE TABLE C16001 (B16001 is discontinued and returns nulls)
+# C16001_001E = Total pop 5+, C16001_002E = English only, C16001_003E = Spanish,
+# C16001_006E = French/Haitian/Cajun, C16001_009E = German/West Germanic,
+# C16001_012E = Russian/Polish/Slavic, C16001_015E = Korean,
+# C16001_018E = Chinese, C16001_021E = Vietnamese, C16001_024E = Tagalog,
+# C16001_027E = Arabic, C16001_030E = Other/unspecified
+curl "https://api.census.gov/data/2021/acs/acs5?get=C16001_001E,C16001_002E,C16001_003E&for=tract:*&in=state:06&in=county:073&key=$CENSUS_API_KEY"
 ```
+
+### Demo/Test Community
+
+Use **Mira Mesa** as the primary test community during development. Rec center neighborhd value: `"MIRA MESA"`. 311 comm_plan_name: `"Mira Mesa"` (normalize to match).
 
 ## Timeline Awareness
 
