@@ -1,5 +1,7 @@
 import type { CommunityBrief } from '../../types/index';
 import { useLanguage } from '../../i18n/context';
+import { BriefFlyer } from './brief-flyer';
+import { toSlug } from '../../utils/slug';
 
 interface BriefDisplayProps {
   brief: CommunityBrief | null;
@@ -129,6 +131,12 @@ export function BriefDisplay({ brief, loading }: BriefDisplayProps) {
           {t('brief.print')}
         </button>
       </div>
+
+      {/* Flyer layout — hidden on screen, shown when printing */}
+      <BriefFlyer
+        brief={brief}
+        neighborhoodSlug={toSlug(brief.neighborhoodName)}
+      />
     </div>
   );
 }
