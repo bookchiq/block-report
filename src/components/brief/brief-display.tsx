@@ -8,8 +8,9 @@ interface BriefDisplayProps {
 export function BriefDisplay({ brief, loading }: BriefDisplayProps) {
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+      <div role="status" aria-label="Generating community brief" className="flex flex-col items-center justify-center py-12 text-gray-500">
         <svg
+          aria-hidden="true"
           className="animate-spin h-8 w-8 mb-3 text-blue-600"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -29,7 +30,8 @@ export function BriefDisplay({ brief, loading }: BriefDisplayProps) {
             d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
           />
         </svg>
-        <p className="text-sm">Generating community brief...</p>
+        <p className="text-sm" aria-hidden="true">Generating community brief...</p>
+        <span className="sr-only">Generating community brief, please wait.</span>
       </div>
     );
   }
@@ -117,8 +119,9 @@ export function BriefDisplay({ brief, loading }: BriefDisplayProps) {
       {/* Print button */}
       <div className="no-print mt-4 text-center">
         <button
+          type="button"
           onClick={() => window.print()}
-          className="px-5 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
+          className="px-5 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           Print Brief
         </button>
