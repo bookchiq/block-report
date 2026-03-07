@@ -3,6 +3,7 @@
 ## Project
 
 Block Report — hyperlocal civic intelligence for San Diego neighborhoods.
+Enter an address or pick a neighborhood to see a civic profile and generate a printable, multilingual community brief.
 Monorepo with a React frontend and Express backend. Anthropic Claude API for brief generation.
 
 ## Architecture
@@ -23,8 +24,8 @@ Client (React + Vite)  →  Backend (Express + Node)  →  External APIs
 
 | Method | Route | Description | Caches? |
 |--------|-------|-------------|---------|
-| GET | `/api/locations/libraries` | Library locations from SODA | Yes (24h) |
-| GET | `/api/locations/rec-centers` | Rec center locations from SODA | Yes (24h) |
+| GET | `/api/locations/libraries` | Library locations (secondary resource layer) | Yes (24h) |
+| GET | `/api/locations/rec-centers` | Rec center locations (secondary resource layer) | Yes (24h) |
 | GET | `/api/locations/transit-stops` | Transit stop data | Yes (24h) |
 | GET | `/api/311?community={name}` | 311 data aggregated by community | Yes (24h) |
 | GET | `/api/demographics?tract={id}` | Census language data by tract | Yes (24h) |
