@@ -27,54 +27,54 @@ Everyone should be in the same repo from the start. Agree on interfaces early (w
 
 ### 11:00–11:30 — Setup & Alignment (all together, 30 min)
 
-- [ ] Create repo, set up Vite + React + TypeScript + Tailwind + Leaflet
-- [ ] Agree on project structure and file layout
-- [ ] Agree on data interfaces (see "Key Interfaces" below)
+- [x] Create repo, set up Vite + React + TypeScript + Tailwind + Leaflet
+- [x] Agree on project structure and file layout
+- [x] Agree on data interfaces (see "Key Interfaces" below)
 - [x] Person A: Census API key registered and added to .env.example
-- [ ] Confirm Anthropic API credits are working
-- [ ] Each person pulls the repo and confirms they can run `npm run dev`
+- [x] Confirm Anthropic API credits are working
+- [x] Each person pulls the repo and confirms they can run `npm run dev`
 
 ### 11:30–1:30 — Parallel Build, Phase 1 (2 hours)
 
 **Person A — Backend & Data Pipeline:**
-- [ ] Set up Express server (`server/index.ts`) with CORS and JSON middleware
-- [ ] Implement file-based cache utility (`server/cache.ts`) — 24h TTL, keyed by URL hash
-- [ ] Build SODA API service (`server/services/soda.ts`) with caching
-- [ ] Implement `/api/locations/libraries` and `/api/locations/rec-centers` endpoints
-- [ ] Implement `/api/311?community={name}` — fetch and aggregate 311 data per community: request count, resolution rate, avg days to close, top problem types
-- [ ] Implement `/api/locations/transit-stops` endpoint
-- [ ] Configure Vite proxy: `'/api' → 'http://localhost:3001'`
-- [ ] Add `dev:all` script using `concurrently` to run frontend + backend
+- [x] Set up Express server (`server/index.ts`) with CORS and JSON middleware
+- [x] ~~Implement file-based cache utility (`server/cache.ts`)~~ — Replaced by local Supabase DB + seed script (`scripts/seed.ts`)
+- [x] ~~Build SODA API service (`server/services/soda.ts`)~~ — Replaced by Supabase queries (`server/services/supabase.ts`)
+- [x] Implement `/api/locations/libraries` and `/api/locations/rec-centers` endpoints
+- [x] Implement `/api/311?community={name}` — fetch and aggregate 311 data per community: request count, resolution rate, avg days to close, top problem types
+- [x] Implement `/api/locations/transit-stops` endpoint
+- [x] Configure Vite proxy: `'/api' → 'http://localhost:3001'`
+- [x] Add `dev:all` script using `concurrently` to run frontend + backend
 
 **Person B — Map & Frontend:**
-- [ ] Build frontend API client (`src/api/client.ts`) — thin fetch wrapper for `/api/*` routes
-- [ ] Set up Leaflet map centered on San Diego (32.7157, -117.1611)
-- [ ] Add library locations as markers (use a book icon or similar)
-- [ ] Add rec center locations as markers (different icon)
-- [ ] Add transit stop layer (small dots or heatmap — keep it lightweight)
-- [ ] Build sidebar/panel UI shell: location name, neighborhood metrics placeholder, brief placeholder
-- [ ] Implement click-on-marker → call `/api/311?community={name}` → populate panel
+- [x] Build frontend API client (`src/api/client.ts`) — thin fetch wrapper for `/api/*` routes
+- [x] Set up Leaflet map centered on San Diego (32.7157, -117.1611)
+- [x] Add library locations as markers (blue default markers)
+- [x] Add rec center locations as markers (green-tinted markers)
+- [x] Add transit stop layer (small gray circles)
+- [x] Build sidebar/panel UI shell: location name, neighborhood metrics, brief display
+- [x] Neighborhood selector dropdown → call `/api/311?community={name}` → populate panel (uses dropdown instead of marker click)
 - [ ] Community boundary overlay if available (nice to have, not blocking)
 
 **Person C — Brief Generator:**
-- [ ] Build Claude service (`server/services/claude.ts`) using Anthropic SDK
-- [ ] Implement `/api/brief/generate` POST endpoint (`server/routes/brief.ts`)
-- [ ] Design the brief prompt template (see "Brief Template" below)
-- [ ] Build the printable brief component with CSS `@media print` styling
-- [ ] Design the print layout: header, neighborhood name, key stats, good news section, "how to participate" section, QR code to full app
+- [x] Build Claude service (`server/services/claude.ts`) using Anthropic SDK
+- [x] Implement `/api/brief/generate` POST endpoint (`server/routes/brief.ts`)
+- [x] Design the brief prompt template (see "Brief Template" below)
+- [x] Build the printable brief component with CSS `@media print` styling
+- [x] Design the print layout: header, neighborhood name, key stats, good news section, "how to participate" section (QR code not yet added)
 
 ### 1:30–2:00 — Lunch + Integration Check
 
-- [ ] Merge branches, resolve conflicts
-- [ ] Person A's data → Person B's map: do markers load? Does clicking populate data?
-- [ ] Person A's data → Person C's brief: does the generator receive the right shape?
-- [ ] Identify what's broken and prioritize fixes
+- [x] Merge branches, resolve conflicts
+- [x] Person A's data → Person B's map: do markers load? Does clicking populate data?
+- [x] Person A's data → Person C's brief: does the generator receive the right shape?
+- [x] Identify what's broken and prioritize fixes
 
 ### 2:00–4:00 — Phase 2: Polish & Features (2 hours)
 
 **Person A:**
-- [ ] Implement Census API service (`server/services/census.ts`) with caching
-- [ ] Implement `/api/demographics?tract={id}` endpoint — ACS language data by tract
+- [x] ~~Implement Census API service (`server/services/census.ts`)~~ — Census data seeded into Supabase `census_language` table
+- [x] Implement `/api/demographics?tract={id}` endpoint — ACS language data by tract
   - Table C16001: Language spoken at home (B16001 is discontinued)
   - Join to neighborhoods via tract-to-community mapping
 - [ ] Compute "access gap" signals: low 311 rate + low transit density + high non-English speaking population
@@ -83,14 +83,24 @@ Everyone should be in the same repo from the start. Agree on interfaces early (w
 **Person B:**
 - [ ] Add choropleth or heatmap layer showing access gap score by neighborhood
 - [ ] Add language selector dropdown (populated from Census data for selected area)
-- [ ] Polish the UI: loading states, error handling, mobile-responsive basics
-- [ ] Add "Generate Brief" button that triggers Person C's module
+- [x] Polish the UI: loading states, error handling, mobile-responsive basics
+- [x] Add "Generate Brief" button that triggers Person C's module
 
 **Person C:**
-- [ ] Add multilingual brief generation (pass selected language to Claude prompt)
-- [ ] Add "good news" section to brief: recently resolved 311 issues, new permits (if time)
-- [ ] Add "how to get involved" section with concrete next steps (council district contact, 311 info, upcoming meetings)
+- [x] Add multilingual brief generation (backend accepts language param; frontend hardcodes `'English'` — needs UI language selector from Person B)
+- [x] Add "good news" section to brief: recently resolved 311 issues included in prompt and display
+- [x] Add "how to get involved" section with concrete next steps (council district contact, 311 info)
 - [ ] If time: start MCP server wrapping SODA API (see stretch goals)
+
+### Known Gaps — Data not wired end-to-end
+
+These are things where the backend capability exists but the data doesn't flow through to the brief or UI:
+
+- [ ] **Transit proximity not computed**: `App.tsx` sends `transit: { nearbyStopCount: 0, nearestStopDistance: 0 }` to the brief. Transit stops are loaded on the map but never aggregated per community. Need to compute nearby stop count from transit stop lat/lng vs community anchor lat/lng.
+- [ ] **Demographics not wired into brief**: `App.tsx` sends `demographics: { topLanguages: [] }` to the brief. The `/api/demographics?tract={id}` endpoint works but requires a Census tract ID — there is no tract-to-neighborhood mapping, so the frontend never calls it.
+- [ ] **Library community field missing**: Libraries from the API have no `community`/`neighborhd` field. Clicking a library marker calls `handleAnchorClick` which reads `anchor.community`, but this is empty. Need either a hardcoded mapping or nearest-neighbor lookup against rec centers.
+- [ ] **Language selector in UI**: Backend accepts any language, but frontend hardcodes `'English'` (`App.tsx:98`). Need a dropdown in the sidebar (even a simple static list: English, Spanish, Chinese, Vietnamese, Tagalog).
+- [ ] **Council district not populated**: The brief's `contactInfo.councilDistrict` is generated by Claude from profile data, but 311 records have `council_district` — this could be extracted and passed through in the metrics response.
 
 ### 4:00–4:30 — Demo Prep (30 min)
 
