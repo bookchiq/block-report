@@ -27,84 +27,84 @@ Everyone should be in the same repo from the start. Agree on interfaces early (w
 
 ### 11:00–11:30 — Setup & Alignment (all together, 30 min)
 
-- [ ] Create repo, set up Vite + React + TypeScript + Tailwind + Leaflet
-- [ ] Agree on project structure and file layout
-- [ ] Agree on data interfaces (see "Key Interfaces" below)
-- [ ] Person A: register for Census API key now: https://api.census.gov/data/key_signup.html (instant)
-- [ ] Confirm Anthropic API credits are working
-- [ ] Each person pulls the repo and confirms they can run `npm run dev`
+- [x] Create repo, set up Vite + React + TypeScript + Tailwind + Leaflet
+- [x] Agree on project structure and file layout
+- [x] Agree on data interfaces (see "Key Interfaces" below)
+- [x] Person A: register for Census API key now: https://api.census.gov/data/key_signup.html (instant)
+- [x] Confirm Anthropic API credits are working
+- [x] Each person pulls the repo and confirms they can run `npm run dev`
 
 ### 11:30–1:30 — Parallel Build, Phase 1 (2 hours)
 
 **Person A — Backend & Data Pipeline:**
-- [ ] Set up Express server (`server/index.ts`) with CORS and JSON middleware
-- [ ] Implement file-based cache utility (`server/cache.ts`) — 24h TTL, keyed by URL hash
-- [ ] Build SODA API service (`server/services/soda.ts`) with caching
-- [ ] Implement `/api/locations/libraries` and `/api/locations/rec-centers` endpoints
-- [ ] Implement `/api/311?community={name}` — fetch and aggregate 311 data per community: request count, resolution rate, avg days to close, top problem types
-- [ ] Implement `/api/locations/transit-stops` endpoint
-- [ ] Configure Vite proxy: `'/api' → 'http://localhost:3001'`
-- [ ] Add `dev:all` script using `concurrently` to run frontend + backend
+- [x] Set up Express server (`server/index.ts`) with CORS and JSON middleware
+- [x] Implement file-based cache utility (`server/cache.ts`) — 24h TTL, keyed by URL hash
+- [x] Build SODA API service (`server/services/soda.ts`) with caching
+- [x] Implement `/api/locations/libraries` and `/api/locations/rec-centers` endpoints
+- [x] Implement `/api/311?community={name}` — fetch and aggregate 311 data per community: request count, resolution rate, avg days to close, top problem types
+- [x] Implement `/api/locations/transit-stops` endpoint
+- [x] Configure Vite proxy: `'/api' → 'http://localhost:3001'`
+- [x] Add `dev:all` script using `concurrently` to run frontend + backend
 
 **Person B — Map & Frontend:**
-- [ ] Build frontend API client (`src/api/client.ts`) — thin fetch wrapper for `/api/*` routes
-- [ ] Set up Leaflet map centered on San Diego (32.7157, -117.1611)
-- [ ] Build address/neighborhood search input as the primary entry point (geocode to lat/lng → determine community)
-- [ ] On neighborhood selection: show boundary on map, populate sidebar with metrics
-- [ ] Build sidebar/panel UI shell: neighborhood name, metrics placeholder, brief placeholder
-- [ ] Add library + rec center markers as a secondary "nearby resources" layer
-- [ ] Add transit stop layer (small dots or heatmap — keep it lightweight)
-- [ ] Community boundary overlay for selected neighborhood
+- [x] Build frontend API client (`src/api/client.ts`) — thin fetch wrapper for `/api/*` routes
+- [x] Set up Leaflet map centered on San Diego (32.7157, -117.1611)
+- [x] Build address/neighborhood search input as the primary entry point (geocode to lat/lng → determine community)
+- [x] On neighborhood selection: show boundary on map, populate sidebar with metrics
+- [x] Build sidebar/panel UI shell: neighborhood name, metrics placeholder, brief placeholder
+- [x] Add library + rec center markers as a secondary "nearby resources" layer
+- [x] Add transit stop layer (small dots or heatmap — keep it lightweight)
+- [x] Community boundary overlay for selected neighborhood
 
 **Person C — Brief Generator:**
-- [ ] Build Claude service (`server/services/claude.ts`) using Anthropic SDK
-- [ ] Implement `/api/brief/generate` POST endpoint (`server/routes/brief.ts`)
-- [ ] Design the brief prompt template (see "Brief Template" below)
-- [ ] Build the printable brief component with CSS `@media print` styling
-- [ ] Design the print layout: header, neighborhood name, key stats, good news section, "how to participate" section, QR code to full app
+- [x] Build Claude service (`server/services/claude.ts`) using Anthropic SDK
+- [x] Implement `/api/brief/generate` POST endpoint (`server/routes/brief.ts`)
+- [x] Design the brief prompt template (see "Brief Template" below)
+- [x] Build the printable brief component with CSS `@media print` styling
+- [x] Design the print layout: header, neighborhood name, key stats, good news section, "how to participate" section, QR code to full app
 
 ### 1:30–2:00 — Lunch + Integration Check
 
-- [ ] Merge branches, resolve conflicts
-- [ ] Person A's data → Person B's map: do markers load? Does clicking populate data?
-- [ ] Person A's data → Person C's brief: does the generator receive the right shape?
-- [ ] Identify what's broken and prioritize fixes
+- [x] Merge branches, resolve conflicts
+- [x] Person A's data → Person B's map: do markers load? Does clicking populate data?
+- [x] Person A's data → Person C's brief: does the generator receive the right shape?
+- [x] Identify what's broken and prioritize fixes
 
 ### 2:00–4:00 — Phase 2: Polish & Features (2 hours)
 
 **Person A:**
-- [ ] Implement Census API service (`server/services/census.ts`) with caching
-- [ ] Implement `/api/demographics?tract={id}` endpoint — ACS language data by tract
+- [x] Implement Census API service (`server/services/census.ts`) with caching
+- [x] Implement `/api/demographics?tract={id}` endpoint — ACS language data by tract
   - Table B16001: Language spoken at home
   - Join to neighborhoods via tract-to-community mapping
-- [ ] Compute "access gap" signals: low 311 rate + low transit density + high non-English speaking population
-- [ ] Expose gap scores through an endpoint or as part of the 311 response
+- [x] Compute "access gap" signals: low 311 rate + low transit density + high non-English speaking population
+- [x] Expose gap scores through an endpoint or as part of the 311 response
 
 **Person B:**
-- [ ] Add choropleth or heatmap layer showing access gap score by neighborhood
-- [ ] Add language selector dropdown (populated from Census data for selected area)
-- [ ] Polish the UI: loading states, error handling, mobile-responsive basics
-- [ ] Add "Generate Brief" button that triggers Person C's module
+- [ ] Add choropleth or heatmap layer showing access gap score by neighborhood — see #49
+- [x] Add language selector dropdown (populated from Census data for selected area)
+- [x] Polish the UI: loading states, error handling, mobile-responsive basics
+- [x] Add "Generate Brief" button that triggers Person C's module
 
 **Person C:**
-- [ ] Add multilingual brief generation (pass selected language to Claude prompt)
-- [ ] Add "good news" section to brief: recently resolved 311 issues, new permits (if time)
-- [ ] Add "how to get involved" section with concrete next steps (council district contact, 311 info, upcoming meetings)
-- [ ] If time: start MCP server wrapping SODA API (see stretch goals)
+- [x] Add multilingual brief generation (pass selected language to Claude prompt)
+- [x] Add "good news" section to brief: recently resolved 311 issues, new permits (if time)
+- [x] Add "how to get involved" section with concrete next steps (council district contact, 311 info, upcoming meetings)
+- [ ] If time: start MCP server wrapping SODA API (see stretch goals) — see #50
 
 ### 4:00–4:30 — Demo Prep (30 min)
 
-- [ ] Freeze features — no new code after 4:00
-- [ ] Fix any remaining bugs in the demo flow
+- [x] Freeze features — no new code after 4:00
+- [x] Fix any remaining bugs in the demo flow
 - [ ] Record 60-second demo video (or confirm live demo works)
-- [ ] Write/finalize README (see template below)
+- [x] Write/finalize README (see template below)
 - [ ] Submit via MCP submission server
-- [ ] Push final code to public GitHub repo
+- [x] Push final code to public GitHub repo
 
 ### 4:30–5:00 — Buffer / Presentations
 
-- [ ] Present or submit
-- [ ] Celebrate
+- [x] Present or submit
+- [x] Celebrate
 
 ---
 
@@ -276,12 +276,12 @@ npm run dev
 
 ## Stretch Goals (in priority order)
 
-1. **MCP Server for SD Open Data** — Wrap the SODA API as an MCP server so any Claude user can query city data. This is the biggest bonus-point opportunity and the most lasting artifact.
-2. **PDF generation** — Generate actual downloadable PDFs instead of relying on browser print.
-3. **Transit travel time to City Hall** — Calculate approximate transit time from each anchor to City Hall (202 C St) using GTFS schedule data.
-4. **Permit activity overlay** — Show recent permit approvals as a "good news" investment signal.
-5. **Historical trends** — Show 311 resolution rates improving or declining over time per neighborhood.
-6. **Deploy** — Get it on Vercel/Netlify with a public URL (eliminates need for demo video).
+1. **MCP Server for SD Open Data** — Wrap the SODA API as an MCP server so any Claude user can query city data. This is the biggest bonus-point opportunity and the most lasting artifact. → #50
+2. **PDF generation** — Generate actual downloadable PDFs instead of relying on browser print. → #51
+3. **Transit travel time to City Hall** — Calculate approximate transit time from each anchor to City Hall (202 C St) using GTFS schedule data. → #52
+4. **Permit activity overlay** — Show recent permit approvals as a "good news" investment signal. → #53
+5. **Historical trends** — Show 311 resolution rates improving or declining over time per neighborhood. → #54
+6. **Deploy** — Get it on Vercel/Netlify with a public URL (eliminates need for demo video). → #55
 
 ---
 
