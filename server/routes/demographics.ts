@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { supabase } from '../services/supabase.js';
+import { logger } from '../logger.js';
 
 const router = Router();
 
@@ -31,7 +32,11 @@ router.get('/', async (req, res) => {
     .single();
 
   if (error) {
-    res.status(error.code === 'PGRST116' ? 404 : 500).json({
+    const status = error.code === 'PGRST116' ? 404 : 500;
+    if (status === 500) {
+      logger.error('Failed to fetch demographics', { error: error.message, tract });
+    }
+    res.status(status).json({
       error: error.code === 'PGRST116' ? 'Tract not found' : error.message,
     });
     return;

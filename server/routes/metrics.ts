@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { supabase } from '../services/supabase.js';
+import { logger } from '../logger.js';
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.get('/', async (req, res) => {
     .ilike('comm_plan_name', community);
 
   if (error) {
+    logger.error('Failed to fetch 311 data', { error: error.message, community });
     res.status(500).json({ error: error.message });
     return;
   }

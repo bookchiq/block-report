@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { generateBrief } from '../services/claude.js';
+import { logger } from '../logger.js';
 import type { NeighborhoodProfile } from '../../src/types/index.js';
 
 const router = Router();
@@ -21,7 +22,10 @@ router.post('/generate', async (req: Request, res: Response) => {
     res.json(brief);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error generating brief';
-    console.error('Brief generation error:', message);
+    logger.error('Brief generation error', {
+      error: message,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     res.status(500).json({ error: message });
   }
 });
