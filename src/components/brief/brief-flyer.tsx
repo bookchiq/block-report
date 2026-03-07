@@ -122,7 +122,7 @@ export function BriefFlyer({ brief, neighborhoodSlug }: BriefFlyerProps) {
       {/* Bottom tagline */}
       <div className="border-t border-black mt-2 pt-1 text-center">
         <p className="text-[9px] font-medium tracking-wide">
-          Block Report &middot; Your neighborhood, your voice
+          Block Report &middot; Your neighborhood, your voice &middot; More resources at {window.location.origin}/resources
         </p>
       </div>
     </div>
