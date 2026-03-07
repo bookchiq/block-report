@@ -5,15 +5,24 @@
     margin: 0.5in;
   }
 
+  /* Reset layout constraints for print */
+  html, body, #root {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Hide everything visually (but keep in flow so children can override) */
   body * {
     visibility: hidden;
   }
 
+  /* Show the flyer and all its children */
   .brief-flyer,
   .brief-flyer * {
     visibility: visible;
   }
 
+  /* Position flyer at top-left, full width */
   .brief-flyer {
     position: absolute;
     left: 0;
@@ -21,14 +30,16 @@
     width: 100%;
   }
 
-  /* Hide screen-only elements */
+  /* Fully hide elements that should not occupy space at all */
   .no-print,
   .brief-content,
-  nav[aria-label="Main navigation"] {
+  nav[aria-label="Main navigation"],
+  main[aria-label="Neighborhood map"],
+  [role="tablist"] {
     display: none !important;
   }
 
-  /* Keep sections together */
+  /* Keep sections together across page breaks */
   .flyer-section {
     break-inside: avoid;
   }
