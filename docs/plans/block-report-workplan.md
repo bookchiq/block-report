@@ -36,28 +36,30 @@ Everyone should be in the same repo from the start. Agree on interfaces early (w
 
 ### 11:30–1:30 — Parallel Build, Phase 1 (2 hours)
 
-**Person A — Data Pipeline:**
-- [ ] Build data fetching module for Get It Done (311) via SODA API
-  - Endpoint: `https://data.sandiego.gov/datasets/get-it-done-311/`
-  - Fields needed: date_requested, problem_category, lat, lng, status, date_closed, community_name (council_district or similar)
-- [ ] Build data fetching for library locations + rec center locations (GeoJSON from portal)
-- [ ] Build data fetching for transit stops (GeoJSON from portal)
-- [ ] Aggregate 311 data per community/neighborhood: request count, resolution rate, avg time to close, top problem types
-- [ ] Expose all data through clean async functions that the frontend can call
+**Person A — Backend & Data Pipeline:**
+- [ ] Set up Express server (`server/index.ts`) with CORS and JSON middleware
+- [ ] Implement file-based cache utility (`server/cache.ts`) — 24h TTL, keyed by URL hash
+- [ ] Build SODA API service (`server/services/soda.ts`) with caching
+- [ ] Implement `/api/locations/libraries` and `/api/locations/rec-centers` endpoints
+- [ ] Implement `/api/311?community={name}` — fetch and aggregate 311 data per community: request count, resolution rate, avg days to close, top problem types
+- [ ] Implement `/api/locations/transit-stops` endpoint
+- [ ] Configure Vite proxy: `'/api' → 'http://localhost:3001'`
+- [ ] Add `dev:all` script using `concurrently` to run frontend + backend
 
 **Person B — Map & Frontend:**
+- [ ] Build frontend API client (`src/api/client.ts`) — thin fetch wrapper for `/api/*` routes
 - [ ] Set up Leaflet map centered on San Diego (32.7157, -117.1611)
 - [ ] Add library locations as markers (use a book icon or similar)
 - [ ] Add rec center locations as markers (different icon)
 - [ ] Add transit stop layer (small dots or heatmap — keep it lightweight)
 - [ ] Build sidebar/panel UI shell: location name, neighborhood metrics placeholder, brief placeholder
-- [ ] Implement click-on-marker → populate panel with location info
+- [ ] Implement click-on-marker → call `/api/311?community={name}` → populate panel
 - [ ] Community boundary overlay if available (nice to have, not blocking)
 
 **Person C — Brief Generator:**
-- [ ] Set up thin API proxy for Anthropic calls (or use client-side if credits allow — check CORS)
+- [ ] Build Claude service (`server/services/claude.ts`) using Anthropic SDK
+- [ ] Implement `/api/brief/generate` POST endpoint (`server/routes/brief.ts`)
 - [ ] Design the brief prompt template (see "Brief Template" below)
-- [ ] Build the brief generation function: takes neighborhood data object, returns structured brief
 - [ ] Build the printable brief component with CSS `@media print` styling
 - [ ] Design the print layout: header, neighborhood name, key stats, good news section, "how to participate" section, QR code to full app
 
@@ -71,11 +73,12 @@ Everyone should be in the same repo from the start. Agree on interfaces early (w
 ### 2:00–4:00 — Phase 2: Polish & Features (2 hours)
 
 **Person A:**
-- [ ] Add Census ACS language data by tract (API: `https://api.census.gov/data/2022/acs/acs5`)
+- [ ] Implement Census API service (`server/services/census.ts`) with caching
+- [ ] Implement `/api/demographics?tract={id}` endpoint — ACS language data by tract
   - Table B16001: Language spoken at home
   - Join to neighborhoods via tract-to-community mapping
 - [ ] Compute "access gap" signals: low 311 rate + low transit density + high non-English speaking population
-- [ ] Feed language data to the brief generator for auto-suggestion
+- [ ] Expose gap scores through an endpoint or as part of the 311 response
 
 **Person B:**
 - [ ] Add choropleth or heatmap layer showing access gap score by neighborhood
@@ -246,8 +249,10 @@ language they speak.
 ## Architecture
 [Describe or paste a simple diagram]
 - React + TypeScript + Vite frontend
+- Express + Node.js backend (API key management, caching, aggregation)
 - Leaflet map with GeoJSON overlays
-- SODA API for city open data (queried client-side)
+- SODA API for city open data (via backend with 24h file cache)
+- Census API for language demographics (via backend with 24h file cache)
 - Census API for language demographics
 - Anthropic Claude API for brief generation
 - Print-optimized CSS for community briefs
