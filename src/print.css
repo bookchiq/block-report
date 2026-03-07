@@ -1,21 +1,35 @@
 /* Print-only styles — brief workstream */
 @media print {
+  @page {
+    size: letter portrait;
+    margin: 0.5in;
+  }
+
   body * {
     visibility: hidden;
   }
-  .brief-content,
-  .brief-content * {
+
+  .brief-flyer,
+  .brief-flyer * {
     visibility: visible;
   }
-  .brief-content {
+
+  .brief-flyer {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
-    padding: 1rem;
   }
+
+  /* Hide screen-only elements */
   .no-print,
+  .brief-content,
   nav[aria-label="Main navigation"] {
     display: none !important;
+  }
+
+  /* Keep sections together */
+  .flyer-section {
+    break-inside: avoid;
   }
 }
