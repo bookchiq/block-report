@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import SanDiegoMap from '../components/map/san-diego-map';
 import NeighborhoodSelector from '../components/ui/neighborhood-selector';
 import Sidebar from '../components/ui/sidebar';
-import { getLibraries, getRecCenters, getTransitStops, get311, getDemographics, generateBrief, getNeighborhoodBoundaries, getTransitScore, getAccessGap } from '../api/client';
-import type { CommunityAnchor, CommunityBrief, NeighborhoodProfile, TransitStop } from '../types';
+import { getLibraries, getRecCenters, getTransitStops, get311, getDemographics, generateBrief, getNeighborhoodBoundaries, getTransitScore, getAccessGap, getBlockData } from '../api/client';
+import type { BlockMetrics, CommunityAnchor, CommunityBrief, NeighborhoodProfile, TransitStop } from '../types';
 import type { FeatureCollection } from 'geojson';
 import { useLanguage } from '../i18n/context';
 import { SUPPORTED_LANGUAGES } from '../i18n/translations';
@@ -31,6 +31,10 @@ export default function NeighborhoodPage() {
 
   const [transitScore, setTransitScore] = useState<NeighborhoodProfile['transit'] | null>(null);
   const [accessGap, setAccessGap] = useState<NeighborhoodProfile['accessGap']>(null);
+  const [pinnedLocation, setPinnedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [blockData, setBlockData] = useState<BlockMetrics | null>(null);
+  const [blockLoading, setBlockLoading] = useState(false);
+
   const [dataError, setDataError] = useState<string | null>(null);
 
   const [brief, setBrief] = useState<CommunityBrief | null>(null);
@@ -118,6 +122,20 @@ export default function NeighborhoodPage() {
     },
     [navigate],
   );
+
+  const handleMapClick = useCallback(async (lat: number, lng: number) => {
+    setPinnedLocation({ lat, lng });
+    setBlockData(null);
+    setBlockLoading(true);
+    try {
+      const data = await getBlockData(lat, lng);
+      setBlockData(data);
+    } catch (err) {
+      console.error('Failed to fetch block data', err);
+    } finally {
+      setBlockLoading(false);
+    }
+  }, []);
 
   const handleGenerateBrief = useCallback(async (language: string) => {
     if (!selectedCommunity || !metrics) return;
@@ -228,6 +246,10 @@ export default function NeighborhoodPage() {
           neighborhoodBoundaries={neighborhoodBoundaries}
           selectedCommunity={selectedCommunity}
           onAnchorClick={(anchor) => { handleAnchorClick(anchor); setMobileView('info'); }}
+          onMapClick={handleMapClick}
+          pinnedLocation={pinnedLocation}
+          blockData={blockData}
+          blockLoading={blockLoading}
         />
       </main>
 
