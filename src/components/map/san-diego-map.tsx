@@ -1,11 +1,11 @@
-import { memo, useCallback, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, CircleMarker, GeoJSON, useMap } from 'react-leaflet';
+import { memo, useCallback, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, CircleMarker, GeoJSON, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 import type { Feature, FeatureCollection } from 'geojson';
-import type { CommunityAnchor, TransitStop } from '../../types';
+import type { BlockMetrics, CommunityAnchor, TransitStop } from '../../types';
 
 // ── Popup content components ─────────────────────────────────────────────────
 
@@ -85,6 +85,79 @@ function TransitPopupContent({ name }: { name: string }) {
   );
 }
 
+function BlockPopupContent({
+  loading,
+  data,
+}: {
+  loading: boolean;
+  data: BlockMetrics | null;
+}) {
+  if (loading) {
+    return (
+      <div className="min-w-[200px] flex items-center gap-2 py-2">
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-orange-500 shrink-0" />
+        <span className="text-sm text-gray-600">Loading block data…</span>
+      </div>
+    );
+  }
+  if (!data) {
+    return (
+      <div className="min-w-[200px] text-sm text-gray-500 py-1">No data available.</div>
+    );
+  }
+  return (
+    <div className="min-w-[220px] max-w-[280px]">
+      <div className="flex items-center gap-1.5 mb-2">
+        <span aria-hidden="true" className="w-2.5 h-2.5 rounded-full shrink-0 bg-orange-500" />
+        <span className="text-xs font-semibold uppercase tracking-wide text-orange-700">
+          Your Block · {data.radiusMiles} mi radius
+        </span>
+      </div>
+      <div className="flex gap-3 mb-3">
+        <div className="text-center">
+          <p className="text-xl font-bold text-gray-900">{data.openCount}</p>
+          <p className="text-xs text-gray-500">open</p>
+        </div>
+        <div className="text-center">
+          <p className="text-xl font-bold text-gray-900">{data.resolvedCount}</p>
+          <p className="text-xs text-gray-500">resolved</p>
+        </div>
+        <div className="text-center">
+          <p className="text-xl font-bold text-gray-900">{data.totalRequests}</p>
+          <p className="text-xs text-gray-500">total</p>
+        </div>
+      </div>
+      {data.topCategory && (
+        <p className="text-xs text-gray-700 mb-2">
+          <span className="font-medium">Top issue:</span> {data.topCategory}
+        </p>
+      )}
+      {data.recentlyResolved.length > 0 && (
+        <div className="mb-2">
+          <p className="text-xs font-medium text-gray-700 mb-1">Recently resolved</p>
+          <ul className="space-y-0.5">
+            {data.recentlyResolved.map((r, i) => (
+              <li key={`${r.category}-${r.date}-${i}`} className="text-xs text-gray-600 flex justify-between gap-2">
+                <span className="truncate">{r.category}</span>
+                <span className="shrink-0 text-gray-400">
+                  {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => window.print()}
+        className="w-full mt-1 rounded bg-orange-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-orange-600"
+      >
+        Print brief for this area
+      </button>
+    </div>
+  );
+}
+
 // Fix Leaflet default icon paths for bundlers
 L.Icon.Default.mergeOptions({ iconUrl, iconRetinaUrl, shadowUrl });
 
@@ -106,6 +179,7 @@ function makePinIcon(color: string) {
 
 const blueIcon = makePinIcon('#3b82f6');
 const greenIcon = makePinIcon('#22c55e');
+const orangeIcon = makePinIcon('#f97316');
 
 interface SanDiegoMapProps {
   libraries: CommunityAnchor[];
@@ -114,6 +188,10 @@ interface SanDiegoMapProps {
   neighborhoodBoundaries: FeatureCollection | null;
   selectedCommunity: string | null;
   onAnchorClick: (anchor: CommunityAnchor) => void;
+  onMapClick?: (lat: number, lng: number) => void;
+  pinnedLocation?: { lat: number; lng: number } | null;
+  blockData?: BlockMetrics | null;
+  blockLoading?: boolean;
 }
 
 // Normalize strings for fuzzy matching (e.g. "City Heights" matches "Mid-City:City Heights")
@@ -129,6 +207,51 @@ function findCommunityFeature(features: Feature[], community: string): Feature |
     features.find((f) => target.includes(norm(f.properties?.cpname ?? ''))) ??
     null
   );
+}
+
+// Child component — pinned block location marker that auto-opens its popup
+function PinnedMarker({
+  lat,
+  lng,
+  loading,
+  data,
+}: {
+  lat: number;
+  lng: number;
+  loading: boolean;
+  data: BlockMetrics | null;
+}) {
+  const markerRef = useRef<L.Marker | null>(null);
+  useEffect(() => {
+    markerRef.current?.openPopup();
+  }, [lat, lng]);
+  return (
+    <Marker
+      position={[lat, lng]}
+      icon={orangeIcon}
+      title="Your block"
+      alt="Pinned location"
+      ref={markerRef}
+    >
+      <Popup>
+        <BlockPopupContent loading={loading} data={data} />
+      </Popup>
+    </Marker>
+  );
+}
+
+// Child component — handles map click events with debounce
+function MapClickHandler({ onClick }: { onClick: (lat: number, lng: number) => void }) {
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useMapEvents({
+    click(e) {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        onClick(e.latlng.lat, e.latlng.lng);
+      }, 300);
+    },
+  });
+  return null;
 }
 
 // Child component — uses useMap() to zoom to selected community bounds
@@ -152,6 +275,10 @@ function SanDiegoMap({
   neighborhoodBoundaries,
   selectedCommunity,
   onAnchorClick,
+  onMapClick,
+  pinnedLocation,
+  blockData,
+  blockLoading = false,
 }: SanDiegoMapProps) {
   const handleMarkerClick = useCallback(
     (anchor: CommunityAnchor) => () => {
@@ -181,6 +308,10 @@ function SanDiegoMap({
           <span aria-hidden="true" className="inline-block w-3 h-3 rounded-full bg-gray-400 shrink-0" />
           <span className="text-gray-700">Transit Stop</span>
         </li>
+        <li className="flex items-center gap-2">
+          <span aria-hidden="true" className="inline-block w-3 h-3 rounded-full bg-orange-500 shrink-0" />
+          <span className="text-gray-700">Your Block</span>
+        </li>
       </ul>
     </nav>
     <MapContainer
@@ -193,6 +324,19 @@ function SanDiegoMap({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+
+      {/* Click-to-explore handler */}
+      {onMapClick && <MapClickHandler onClick={onMapClick} />}
+
+      {/* Pinned location marker — auto-opens popup when dropped */}
+      {pinnedLocation && (
+        <PinnedMarker
+          lat={pinnedLocation.lat}
+          lng={pinnedLocation.lng}
+          loading={blockLoading}
+          data={blockData ?? null}
+        />
+      )}
 
       {/* Zoom to selected community + highlight its boundary */}
       <MapController feature={selectedFeature} />

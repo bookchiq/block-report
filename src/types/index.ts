@@ -55,6 +55,15 @@ export interface TransitStop {
   lng: number;
 }
 
+export interface BlockMetrics {
+  totalRequests: number;
+  openCount: number;
+  resolvedCount: number;
+  topCategory: string | null;
+  recentlyResolved: { category: string; date: string }[];
+  radiusMiles: number;
+}
+
 export interface CommunityBrief {
   neighborhoodName: string;
   language: string;
