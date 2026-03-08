@@ -2,7 +2,7 @@
 @media print {
   @page {
     size: letter portrait;
-    margin: 0.5in;
+    margin: 0.6in 0.7in;
   }
 
   /* Reset layout constraints for print */
@@ -11,26 +11,31 @@
     overflow: visible !important;
   }
 
-  /* Hide everything visually (but keep in flow so children can override) */
+  /* Hide everything visually but keep in flow */
   body * {
     visibility: hidden;
   }
 
-  /* Show the flyer and all its children */
-  .brief-flyer,
-  .brief-flyer * {
-    visibility: visible;
-  }
-
-  /* Position flyer at top-left, full width */
+  /* The flyer has display:none from Tailwind's "hidden" class — override it */
   .brief-flyer {
+    display: block !important;
+    visibility: visible;
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
+    padding: 0;
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  /* Fully hide elements that should not occupy space at all */
+  /* Make all flyer children visible */
+  .brief-flyer * {
+    visibility: visible;
+  }
+
+  /* Fully remove elements that shouldn't occupy space */
   .no-print,
   .brief-content,
   nav[aria-label="Main navigation"],

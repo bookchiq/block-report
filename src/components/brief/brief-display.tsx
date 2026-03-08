@@ -1,4 +1,4 @@
-import type { CommunityBrief } from '../../types/index';
+import type { CommunityBrief, NeighborhoodProfile } from '../../types/index';
 import { useLanguage } from '../../i18n/context';
 import { BriefFlyer } from './brief-flyer';
 import { toSlug } from '../../utils/slug';
@@ -6,9 +6,11 @@ import { toSlug } from '../../utils/slug';
 interface BriefDisplayProps {
   brief: CommunityBrief | null;
   loading: boolean;
+  metrics?: NeighborhoodProfile['metrics'] | null;
+  topLanguages?: { language: string; percentage: number }[];
 }
 
-export default function BriefDisplay({ brief, loading }: BriefDisplayProps) {
+export default function BriefDisplay({ brief, loading, metrics, topLanguages }: BriefDisplayProps) {
   const { t } = useLanguage();
 
   if (loading) {
@@ -138,6 +140,8 @@ export default function BriefDisplay({ brief, loading }: BriefDisplayProps) {
       <BriefFlyer
         brief={brief}
         neighborhoodSlug={toSlug(brief.neighborhoodName)}
+        metrics={metrics}
+        topLanguages={topLanguages}
       />
     </>
   );
