@@ -377,7 +377,7 @@ export default function Sidebar({
         </div>
       )}
 
-      <BriefDisplay brief={brief} loading={briefLoading} />
+      <BriefDisplay brief={brief} loading={briefLoading} metrics={metrics} topLanguages={topLanguages} />
     </div>
   );
 }
