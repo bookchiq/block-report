@@ -13,6 +13,8 @@ interface FlyerLayoutProps {
   neighborhoodSlug: string;
   metrics?: NeighborhoodProfile['metrics'] | null;
   topLanguages?: { language: string; percentage: number }[];
+  /** When true, the flyer is visible on screen (used in preview). Default: hidden (print-only). */
+  inline?: boolean;
 }
 
 /** Truncate text to roughly N sentences. */
@@ -22,7 +24,7 @@ function truncateSentences(text: string, max: number): string {
   return sentences.slice(0, max).join('').trim();
 }
 
-export function FlyerLayout({ report, neighborhoodSlug, metrics, topLanguages }: FlyerLayoutProps) {
+export function FlyerLayout({ report, neighborhoodSlug, metrics, topLanguages, inline = false }: FlyerLayoutProps) {
   const formattedDate = new Date(report.generatedAt).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -41,7 +43,7 @@ export function FlyerLayout({ report, neighborhoodSlug, metrics, topLanguages }:
     .slice(0, 4);
 
   return (
-    <div className="flyer-layout hidden text-black font-sans">
+    <div className={`flyer-layout ${inline ? '' : 'hidden'} text-black font-sans`}>
 
       {/* ── TOP BANNER ── */}
       <div className="border-b-4 border-black pb-3 mb-4">

@@ -40,7 +40,8 @@
   .report-content,
   nav[aria-label="Main navigation"],
   main[aria-label="Neighborhood map"],
-  [role="tablist"] {
+  [role="tablist"],
+  [role="dialog"] {
     display: none !important;
   }
 
