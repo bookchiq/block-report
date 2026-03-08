@@ -2,13 +2,17 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const LOG_DIR = path.join(__dirname, 'logs');
-const LOG_FILE = path.join(LOG_DIR, 'server.log');
+const isVercel = !!process.env.VERCEL;
 
-fs.mkdirSync(LOG_DIR, { recursive: true });
+let logStream: fs.WriteStream | null = null;
 
-const logStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
+if (!isVercel) {
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const LOG_DIR = path.join(__dirname, 'logs');
+  fs.mkdirSync(LOG_DIR, { recursive: true });
+  const LOG_FILE = path.join(LOG_DIR, 'server.log');
+  logStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
+}
 
 type LogLevel = 'info' | 'warn' | 'error';
 
@@ -21,7 +25,9 @@ function write(level: LogLevel, message: string, extra?: Record<string, unknown>
   };
   const line = JSON.stringify(entry);
 
-  logStream.write(line + '\n');
+  if (logStream) {
+    logStream.write(line + '\n');
+  }
 
   if (level === 'error') {
     console.error(line);
