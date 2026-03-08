@@ -58,6 +58,14 @@ export function getBlockData(lat: number, lng: number, radius = 0.25): Promise<B
   return fetchJSON(`${BASE}/block?lat=${lat}&lng=${lng}&radius=${radius}`);
 }
 
+export async function getPreGeneratedReport(community: string, language: string): Promise<CommunityReport | null> {
+  try {
+    return await fetchJSON(`${BASE}/report?community=${encodeURIComponent(community)}&language=${encodeURIComponent(language)}`);
+  } catch {
+    return null; // 404 or error — no pre-generated report available
+  }
+}
+
 export function generateReport(profile: NeighborhoodProfile, language: string): Promise<CommunityReport> {
   return fetchJSON(`${BASE}/report/generate`, {
     method: 'POST',

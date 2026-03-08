@@ -15,29 +15,9 @@ export default function ReportView({ report, loading, metrics, topLanguages }: R
 
   if (loading) {
     return (
-      <div role="status" aria-label={t('report.generating')} className="flex flex-col items-center justify-center py-12 text-gray-500">
-        <svg
-          aria-hidden="true"
-          className="animate-spin h-8 w-8 mb-3 text-blue-600"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-          />
-        </svg>
-        <p className="text-sm" aria-hidden="true">{t('report.generating')}</p>
+      <div role="status" aria-label={t('report.generating')} className="flex flex-col items-center justify-center py-8 text-gray-500">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600 mb-2" />
+        <p className="text-sm text-gray-500">{t('report.generatingBackground') ?? 'Generating your report...'}</p>
         <span className="sr-only">{t('report.generatingSr')}</span>
       </div>
     );
@@ -62,7 +42,10 @@ export default function ReportView({ report, loading, metrics, topLanguages }: R
             {report.neighborhoodName}
           </h2>
           <p className="text-sm text-gray-500 mt-1">
-            {t('report.communityReport')} &middot; {formattedDate} &middot; {report.language}
+            {t('report.communityReport')} &middot; {report.language}
+          </p>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Data as of {formattedDate}
           </p>
         </div>
 

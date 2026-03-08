@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import SanDiegoMap from '../components/map/san-diego-map';
 import NeighborhoodSelector from '../components/ui/neighborhood-selector';
 import Sidebar from '../components/ui/sidebar';
-import { getLibraries, getRecCenters, getTransitStops, get311, getDemographics, generateReport, getNeighborhoodBoundaries, getTransitScore, getAccessGap, getBlockData } from '../api/client';
+import { getLibraries, getRecCenters, getTransitStops, get311, getDemographics, generateReport, getPreGeneratedReport, getNeighborhoodBoundaries, getTransitScore, getAccessGap, getBlockData } from '../api/client';
 import type { BlockMetrics, CommunityAnchor, CommunityReport, NeighborhoodProfile, TransitStop } from '../types';
 import type { FeatureCollection } from 'geojson';
 import { useLanguage } from '../i18n/context';
@@ -13,7 +13,7 @@ import { toSlug, fromSlug } from '../utils/slug';
 export default function NeighborhoodPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { lang, setLang, t } = useLanguage();
+  const { lang, setLang, t, reportLang } = useLanguage();
   const [mobileView, setMobileView] = useState<'map' | 'info'>('map');
 
   const [libraries, setLibraries] = useState<CommunityAnchor[]>([]);
@@ -74,7 +74,6 @@ export default function NeighborhoodPage() {
 
     setMetricsLoading(true);
     setMetrics(null);
-    setReport(null);
     setTopLanguages([]);
     setTransitScore(null);
     setAccessGap(null);
@@ -101,6 +100,66 @@ export default function NeighborhoodPage() {
         // Demographics may not be available for all communities
       });
   }, [selectedCommunity]);
+
+  // Auto-fetch pre-generated report, falling back to on-demand generation
+  useEffect(() => {
+    if (!selectedCommunity) return;
+
+    let cancelled = false;
+    setReport(null);
+    setReportError(null);
+    setReportLoading(true);
+
+    (async () => {
+      // Step 1: Try to load pre-generated report instantly
+      const cached = await getPreGeneratedReport(selectedCommunity, reportLang);
+      if (cancelled) return;
+
+      if (cached) {
+        setReport(cached);
+        setReportLoading(false);
+        return;
+      }
+
+      // Step 2: No cached report — generate on-demand if metrics are available
+      if (!metrics) {
+        // Metrics haven't loaded yet; this effect will re-run when they do
+        setReportLoading(false);
+        return;
+      }
+
+      const anchor = selectedAnchor ?? {
+        id: '',
+        name: selectedCommunity,
+        type: 'library' as const,
+        lat: 0,
+        lng: 0,
+        address: '',
+        community: selectedCommunity,
+      };
+
+      const profile: NeighborhoodProfile = {
+        communityName: selectedCommunity,
+        anchor,
+        metrics,
+        transit: transitScore ?? { nearbyStopCount: 0, nearestStopDistance: 0, stopCount: 0, agencyCount: 0, agencies: [], transitScore: 0, cityAverage: 0, travelTimeToCityHall: null },
+        demographics: { topLanguages },
+        accessGap: accessGap ?? null,
+      };
+
+      try {
+        const result = await generateReport(profile, reportLang);
+        if (!cancelled) setReport(result);
+      } catch (err) {
+        if (!cancelled) setReportError(err instanceof Error ? err.message : 'Failed to generate report');
+      } finally {
+        if (!cancelled) setReportLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCommunity, reportLang, metrics]);
 
   const handleCommunityChange = useCallback(
     (community: string) => {
