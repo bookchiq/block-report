@@ -329,14 +329,11 @@ export default function Sidebar({
               </p>
               <button
                 type="button"
-                onClick={() => {
-                  setReportLang(suggestedLangMeta.label);
-                  onGenerateReport(suggestedLangMeta.label);
-                }}
+                onClick={() => setReportLang(suggestedLangMeta.label)}
                 disabled={reportLoading}
                 className="w-full rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               >
-                {t('sidebar.generateReportIn', { language: suggestedLangMeta.nativeLabel })}
+                {t('sidebar.switchReportLang', { language: suggestedLangMeta.nativeLabel }) ?? `Switch report to ${suggestedLangMeta.nativeLabel}`}
               </button>
             </div>
           )}
@@ -364,16 +361,16 @@ export default function Sidebar({
             </div>
           </div>
 
-          {/* Generate brief */}
-          <button
-            type="button"
-            onClick={() => onGenerateReport(reportLang)}
-            disabled={reportLoading}
-            aria-busy={reportLoading}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-          >
-            {reportLoading ? t('sidebar.generating') : t('sidebar.generateReport')}
-          </button>
+          {/* Regenerate report — only show when a report already exists */}
+          {report && !reportLoading && (
+            <button
+              type="button"
+              onClick={() => onGenerateReport(reportLang)}
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            >
+              {t('sidebar.regenerateReport') ?? 'Regenerate Report'}
+            </button>
+          )}
         </>
       )}
 
