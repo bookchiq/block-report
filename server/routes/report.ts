@@ -3,13 +3,14 @@ import type { Request, Response } from 'express';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { generateReport } from '../services/claude.js';
+import { generateReport, generateBlockReport } from '../services/claude.js';
 import { logger } from '../logger.js';
-import type { NeighborhoodProfile } from '../../src/types/index.js';
+import type { NeighborhoodProfile, StoredBlockReport } from '../../src/types/index.js';
 import { getCachedReport, saveCachedReport } from '../services/report-cache.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPORTS_DIR = path.join(__dirname, '..', 'cache', 'reports');
+const BLOCK_REPORTS_DIR = path.join(REPORTS_DIR, 'blocks');
 
 const LANGUAGE_CODES: Record<string, string> = {
   English: 'en',
@@ -68,10 +69,60 @@ async function getPreGeneratedReport(
 
 const router = Router();
 
-// GET /api/report?community={name}&language={lang}
-// Returns pre-generated report if available, 404 otherwise
+// GET /api/report?community={name}&language={lang} — pre-generated community report
+// GET /api/report?lat=X&lng=Y&radius=Z&language=L — pre-generated block-level report
 router.get('/', async (req: Request, res: Response) => {
   try {
+    // Block-level lookup by coordinates
+    if (req.query.lat && req.query.lng) {
+      const lat = parseFloat(req.query.lat as string);
+      const lng = parseFloat(req.query.lng as string);
+      const radius = parseFloat(req.query.radius as string) || 0.25;
+      const language = (req.query.language as string) || 'en';
+
+      if (isNaN(lat) || isNaN(lng)) {
+        res.status(400).json({ error: 'lat and lng must be valid numbers' });
+        return;
+      }
+
+      const files = await fs.readdir(BLOCK_REPORTS_DIR).catch(() => [] as string[]);
+      const langSuffix = `_${language}.json`;
+      const COORD_TOLERANCE = 0.0002; // ~0.01 miles in degrees
+
+      for (const file of files) {
+        if (!file.endsWith(langSuffix)) continue;
+
+        try {
+          const content = await fs.readFile(path.join(BLOCK_REPORTS_DIR, file), 'utf-8');
+          const stored = JSON.parse(content) as StoredBlockReport;
+
+          if (
+            Math.abs(stored.lat - lat) < COORD_TOLERANCE &&
+            Math.abs(stored.lng - lng) < COORD_TOLERANCE &&
+            stored.radiusMiles === radius
+          ) {
+            logger.info('Serving pre-generated block report', {
+              anchor: stored.anchorName,
+              language,
+            });
+            res.json({
+              ...stored.report,
+              preGenerated: true,
+              anchorName: stored.anchorName,
+              anchorType: stored.anchorType,
+            });
+            return;
+          }
+        } catch {
+          // Skip malformed files
+        }
+      }
+
+      res.status(404).json({ error: 'No pre-generated block report found for this location' });
+      return;
+    }
+
+    // Community-level lookup by name
     const community = req.query.community as string;
     const language = req.query.language as string || 'English';
 
@@ -137,6 +188,56 @@ router.post('/generate', async (req: Request, res: Response) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error generating report';
     logger.error('Report generation error', {
+      error: message,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/report/generate-block — Generate a block-level report for an anchor location
+router.post('/generate-block', async (req: Request, res: Response) => {
+  try {
+    const { anchor, blockMetrics, language, demographics } = req.body;
+
+    if (!anchor || !blockMetrics || !language) {
+      res.status(400).json({ error: 'Missing required fields: anchor, blockMetrics, language' });
+      return;
+    }
+
+    // Check for a pre-generated block report first
+    const langCode = LANGUAGE_CODES[language] || language.toLowerCase().slice(0, 2);
+    const filename = `${sanitizeFilename(anchor.id || anchor.name)}_${langCode}.json`;
+    const filePath = path.join(BLOCK_REPORTS_DIR, filename);
+
+    try {
+      const content = await fs.readFile(filePath, 'utf-8');
+      const stored = JSON.parse(content) as StoredBlockReport;
+      logger.info('Serving pre-generated block report', {
+        anchor: stored.anchorName,
+        language,
+      });
+      res.json({
+        ...stored.report,
+        preGenerated: true,
+        anchorName: stored.anchorName,
+        anchorType: stored.anchorType,
+      });
+      return;
+    } catch {
+      // No cached version — generate on-demand
+    }
+
+    logger.info('Generating block report on-demand', {
+      anchor: anchor.name,
+      language,
+    });
+
+    const report = await generateBlockReport(anchor, blockMetrics, language, demographics);
+    res.json(report);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error generating block report';
+    logger.error('Block report generation error', {
       error: message,
       stack: error instanceof Error ? error.stack : undefined,
     });
