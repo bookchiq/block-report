@@ -141,7 +141,7 @@ function FlyerModal({
 
   return (
     <div
-      className="no-print fixed inset-0 z-50 flex items-start justify-center bg-black/50 backdrop-blur-sm overflow-y-auto p-4 md:p-8"
+      className="no-print fixed inset-0 z-[1000] flex items-start justify-center bg-black/50 backdrop-blur-sm overflow-y-auto p-4 md:p-8"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
