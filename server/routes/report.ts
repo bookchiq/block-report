@@ -180,9 +180,11 @@ router.post('/generate', async (req: Request, res: Response) => {
     const report = await generateReport(profile, language);
 
     // Cache the generated report for future instant access
-    saveCachedReport(profile.communityName, language, report).catch((err) => {
+    try {
+      await saveCachedReport(profile.communityName, language, report);
+    } catch (err) {
       logger.error('Failed to cache report', { error: err instanceof Error ? err.message : String(err) });
-    });
+    }
 
     res.json(report);
   } catch (error) {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import SanDiegoMap from '../components/map/san-diego-map';
 import NeighborhoodSelector from '../components/ui/neighborhood-selector';
@@ -101,13 +101,19 @@ export default function NeighborhoodPage() {
       });
   }, [selectedCommunity]);
 
+  // Clear report when community or language changes
+  const generatingRef = useRef(false);
+  useEffect(() => {
+    setReport(null);
+    setReportError(null);
+  }, [selectedCommunity, reportLang]);
+
   // Auto-fetch pre-generated report, falling back to on-demand generation
   useEffect(() => {
     if (!selectedCommunity) return;
+    if (generatingRef.current) return;
 
     let cancelled = false;
-    setReport(null);
-    setReportError(null);
     setReportLoading(true);
 
     (async () => {
@@ -127,6 +133,14 @@ export default function NeighborhoodPage() {
         setReportLoading(false);
         return;
       }
+
+      // Already have a report — don't regenerate on metrics updates
+      if (report) {
+        setReportLoading(false);
+        return;
+      }
+
+      generatingRef.current = true;
 
       const anchor = selectedAnchor ?? {
         id: '',
@@ -153,6 +167,7 @@ export default function NeighborhoodPage() {
       } catch (err) {
         if (!cancelled) setReportError(err instanceof Error ? err.message : 'Failed to generate report');
       } finally {
+        generatingRef.current = false;
         if (!cancelled) setReportLoading(false);
       }
     })();
