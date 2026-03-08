@@ -81,3 +81,15 @@ export interface CommunityReport {
     anchorLocation: string;
   };
 }
+
+export interface StoredBlockReport {
+  anchorName: string;
+  anchorType: 'library' | 'rec_center';
+  lat: number;
+  lng: number;
+  radiusMiles: number;
+  communityName: string;
+  language: string;
+  generatedAt: string;
+  report: CommunityReport;
+}
