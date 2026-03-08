@@ -13,6 +13,7 @@
     "db:stop": "npx supabase stop",
     "db:reset": "npx supabase db reset",
     "db:seed": "node --env-file=.env --import=tsx scripts/seed.ts",
+    "generate-reports": "node --env-file=.env --import=tsx server/scripts/generate-reports.ts",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix"
   },
