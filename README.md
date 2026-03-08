@@ -1,8 +1,28 @@
 # Block Report
 
-Hyperlocal civic intelligence for San Diego neighborhoods. Enter an address or pick a neighborhood to see a civic profile — libraries, rec centers, transit stops, 311 service requests, and language demographics — then generate a printable, multilingual community brief powered by Claude.
+## Team
 
-Every neighborhood has a shareable URL (e.g. `/neighborhood/mira-mesa`) ready for QR codes on printed flyers.
+- **Team name:** Team Ctrl+P
+- **Members:** Sarah L ([@bookchiq](https://github.com/bookchiq)), Cherr B ([@ch3rr17](https://github.com/ch3rr17)), Nicholas B ([@spotshare-nick](https://github.com/spotshare-nick))
+
+## Problem Statement
+
+San Diego residents, community organizers, and council staff lack a quick, digestible way to access hyperlocal civic data — 311 service requests, nearby public resources, and language demographics — for their specific neighborhood. This information is scattered across multiple city portals and Census datasets, making it hard to get a clear picture of what's happening on your block and what resources are available.
+
+## What It Does
+
+Block Report is a hyperlocal civic intelligence tool for San Diego neighborhoods. Enter an address or pick a neighborhood to see a civic profile — libraries, rec centers, transit stops, 311 service requests, and language demographics — then generate a printable, multilingual community brief powered by Claude. Every neighborhood has a shareable URL (e.g. `/neighborhood/mira-mesa`) ready for QR codes on printed flyers.
+
+## Data Sources Used
+
+- **San Diego Open Data Portal** — library locations, recreation centers, transit stops, and 311/Get It Done service requests
+- **U.S. Census ACS** — language spoken at home by census tract (table C16001)
+- **Supabase** — local database layer for server-side aggregation of city data
+
+## Links
+
+- **Live app:** Not yet deployed (runs locally)
+- **Demo video:** N/A
 
 ## Quick Start
 
@@ -75,7 +95,7 @@ The first `db:start` will download several Docker images, which may take a few m
 3. **Generate a brief** — Claude synthesizes the data into a printable community summary
 4. **Share** — every neighborhood page has a unique URL for linking or QR codes
 
-## Architecture
+## Architecture / How Claude Is Used
 
 ```
 React + Vite (SPA)  →  Express (API)  →  External APIs
@@ -88,6 +108,7 @@ React + Vite (SPA)  →  Express (API)  →  External APIs
 - The frontend never talks to external APIs directly — everything flows through the Express backend
 - API keys stay server-side only
 - SODA and Census responses are cached to disk for 24 hours (`server/cache/`)
+- **Claude's role:** The backend sends aggregated civic data (311 trends, nearby resources, language demographics) to Claude, which synthesizes it into a printable, plain-language community brief. Briefs can be generated in multiple languages based on the neighborhood's demographic profile.
 
 ## Project Structure
 
