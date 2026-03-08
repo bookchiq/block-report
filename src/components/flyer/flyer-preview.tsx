@@ -185,6 +185,7 @@ function FlyerModal({
             neighborhoodSlug={slug}
             metrics={metrics}
             topLanguages={topLanguages}
+            inline
           />
         </div>
       </div>

@@ -1,8 +1,6 @@
 import type { CommunityReport, NeighborhoodProfile } from '../../types/index';
 import { useLanguage } from '../../i18n/context';
-import { FlyerLayout } from '../flyer/flyer-layout';
 import { FlyerPreview } from '../flyer/flyer-preview';
-import { toSlug } from '../../utils/slug';
 
 interface ReportViewProps {
   report: CommunityReport | null;
@@ -33,14 +31,6 @@ export default function ReportView({ report, loading, metrics, topLanguages }: R
       {/* Flyer preview — visible on-screen as a paper card */}
       <FlyerPreview
         report={report}
-        metrics={metrics}
-        topLanguages={topLanguages}
-      />
-
-      {/* Flyer layout — hidden on screen, shown by print.css */}
-      <FlyerLayout
-        report={report}
-        neighborhoodSlug={toSlug(report.neighborhoodName)}
         metrics={metrics}
         topLanguages={topLanguages}
       />
