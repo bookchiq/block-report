@@ -32,6 +32,7 @@ export interface NeighborhoodProfile {
     agencies: string[];
     transitScore: number;
     cityAverage: number;
+    travelTimeToCityHall: number | null;
   };
   demographics: {
     topLanguages: { language: string; percentage: number }[];
@@ -64,7 +65,7 @@ export interface BlockMetrics {
   radiusMiles: number;
 }
 
-export interface CommunityBrief {
+export interface CommunityReport {
   neighborhoodName: string;
   language: string;
   generatedAt: string;

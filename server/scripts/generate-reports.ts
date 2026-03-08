@@ -8,7 +8,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import type { NeighborhoodProfile, CommunityBrief } from '../../src/types/index.js';
+import type { NeighborhoodProfile, CommunityReport } from '../../src/types/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPORTS_DIR = path.join(__dirname, '..', 'cache', 'reports');
@@ -39,7 +39,7 @@ interface StoredReport {
   languageCode: string;
   generatedAt: string;
   dataAsOf: string;
-  report: CommunityBrief;
+  report: CommunityReport;
 }
 
 interface ManifestEntry {
@@ -142,6 +142,7 @@ async function assembleProfile(community: string): Promise<NeighborhoodProfile |
         ...transit,
         nearbyStopCount: transit.stopCount,
         nearestStopDistance: 0,
+        travelTimeToCityHall: (transit as Record<string, unknown>).travelTimeToCityHall as number | null ?? null,
       },
       demographics,
     };
@@ -172,8 +173,8 @@ function getTargetLanguages(profile: NeighborhoodProfile): string[] {
 async function generateReport(
   profile: NeighborhoodProfile,
   language: string,
-): Promise<CommunityBrief> {
-  return fetchJSON<CommunityBrief>(`${BASE_URL}/api/brief/generate`, {
+): Promise<CommunityReport> {
+  return fetchJSON<CommunityReport>(`${BASE_URL}/api/report/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ profile, language }),
